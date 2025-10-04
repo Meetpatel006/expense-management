@@ -65,7 +65,7 @@ export default function ApprovalsPage() {
                     </Button>
                     <Button
                       size="sm"
-                      variant="success"
+                      variant="default"
                       onClick={() => approveExpense(e.id)}
                       disabled={!canCurrentUserActOn(e)}
                     >
@@ -116,17 +116,17 @@ export default function ApprovalsPage() {
                 </div>
                 <div>
                   <span className="text-muted-foreground">Converted: </span>
-                  <CurrencyConverterInline amount={record.amount} from={record.currency} to={record.__baseCurrency} />
+                  <CurrencyConverterInline amount={record.amount} from={record.currency} to={record.__baseCurrency || "USD"} />
                 </div>
               </div>
               <p className="text-xs text-muted-foreground">
-                Converted to {record.__baseCurrency} using real-time rates
+                Converted to {record.__baseCurrency || "USD"} using real-time rates
               </p>
               <h3 className="text-sm font-medium">Approval History</h3>
               <ApprovalTimeline history={record.approvalHistory || []} />
               <div className="flex gap-2 justify-end">
                 <Button
-                  variant="success"
+                  variant="default"
                   onClick={() => {
                     approveExpense(record.id)
                     setOpenId(null)

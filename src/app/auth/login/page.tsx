@@ -20,7 +20,7 @@ const loginSchema = z.object({
 export default function LoginPage() {
   const router = useRouter()
   const { toast } = useToast()
-  const { login } = useAppStore()
+  const { login, setCurrentUser, users } = useAppStore()
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -32,6 +32,16 @@ export default function LoginPage() {
     if (!ok) {
       toast({ title: "Login failed", description: "Invalid credentials", variant: "destructive" })
       return
+    }
+    // find the user in the store and set cookie
+    const u = users.find((x) => x.email.toLowerCase() === values.email.toLowerCase())
+    try {
+      if (u) {
+        setCurrentUser(u)
+        document.cookie = `auth=${encodeURIComponent(JSON.stringify({ id: u.id, role: u.role }))}; path=/; max-age=${60 * 60 * 24}`
+      }
+    } catch (e) {
+      // ignore
     }
     router.push("/dashboard")
   }
@@ -80,10 +90,10 @@ export default function LoginPage() {
             </div>
 
             <div className="flex items-center justify-between text-sm">
-              <Link href="/forgot-password" className="text-primary underline">
+              <Link href="/auth/forgot-password" className="text-primary underline">
                 Forgot password?
               </Link>
-              <Link href="/signup" className="text-primary underline">
+              <Link href="/auth/signup" className="text-primary underline">
                 Don&apos;t have an account? Signup
               </Link>
             </div>

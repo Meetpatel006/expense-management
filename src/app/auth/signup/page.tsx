@@ -42,7 +42,7 @@ export default function SignupPage() {
   const [selectedCountry, setSelectedCountry] = useState("")
   const router = useRouter()
   const { toast } = useToast()
-  const { upsertCompanyAndAdmin } = useAppStore()
+  const { upsertCompanyAndAdmin, setCurrentUser } = useAppStore()
   const { data: countries } = useSWR<CountryItem[]>(
     "https://restcountries.com/v3.1/all?fields=name,currencies",
     fetcher,
@@ -96,6 +96,12 @@ export default function SignupPage() {
     }
     upsertCompanyAndAdmin(company, admin)
     toast({ title: "Signup successful", description: `Base currency set to ${baseCurrency}` })
+    try {
+      setCurrentUser(admin)
+      document.cookie = `auth=${encodeURIComponent(JSON.stringify({ id: admin.id, role: admin.role }))}; path=/; max-age=${60 * 60 * 24}`
+    } catch (e) {
+      // ignore
+    }
     router.push("/dashboard")
   }
 
@@ -170,7 +176,7 @@ export default function SignupPage() {
             </form>
             <div className="text-sm text-center">
               Already have an account?{" "}
-              <Link href="/login" className="text-primary underline">
+              <Link href="/auth/login" className="text-primary underline">
                 Log in
               </Link>
             </div>

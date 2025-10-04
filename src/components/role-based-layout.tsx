@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useAppStore } from "@/lib/state"
@@ -21,8 +22,23 @@ const NavLink = ({ href, label }: { href: string; label: string }) => {
 }
 
 export function RoleBasedLayout({ children }: { children: React.ReactNode }) {
-  const { currentUser, logout } = useAppStore()
+  const { currentUser, logout, setCurrentUser, users } = useAppStore()
   const { theme, setTheme } = useTheme()
+
+  useEffect(() => {
+    try {
+      const m = document.cookie.split(";").map((c) => c.trim()).find((c) => c.startsWith("auth="))
+      if (!m) return
+      const val = decodeURIComponent(m.split("=")[1] || "")
+      const parsed = JSON.parse(val)
+      if (parsed && parsed.id) {
+        const u = users.find((x) => x.id === parsed.id) || null
+        setCurrentUser(u)
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [setCurrentUser, users])
 
   return (
     <div className="min-h-[100svh] grid grid-rows-[auto_1fr]">

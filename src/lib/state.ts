@@ -15,6 +15,7 @@ type Store = {
   upsertCompanyAndAdmin: (company: Company, admin: User) => void
   login: (email: string, password: string) => boolean
   logout: () => void
+  setCurrentUser: (u: User | null) => void
 
   // users
   usersByCompany: () => User[]
@@ -123,6 +124,7 @@ export const useAppStore = create<Store>((set, get) => ({
       currentCompany: company,
     }))
   },
+  setCurrentUser: (u) => set(() => ({ currentUser: u })),
   login: (email, password) => {
     const u = get().users.find((x) => x.email.toLowerCase() === email.toLowerCase())
     if (!u || (u.password && u.password !== password)) return false
@@ -131,7 +133,7 @@ export const useAppStore = create<Store>((set, get) => ({
   },
   logout: () => {
     set({ currentUser: null })
-    window.location.href = "/"
+    window.location.href = "/auth/login"
   },
 
   usersByCompany: () => {

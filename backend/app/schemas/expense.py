@@ -1,5 +1,5 @@
 from pydantic import BaseModel, UUID4, validator
-from typing import Optional, List
+from typing import Optional, List, Any
 from datetime import datetime
 from decimal import Decimal
 from app.models.expense import ExpenseStatus, ExpenseCategory
@@ -55,7 +55,29 @@ class ExpenseResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class UserInExpense(BaseModel):
+    id: UUID4
+    name: str
+    email: str
+    
+    class Config:
+        from_attributes = True
+
+class ApprovalHistoryInExpense(BaseModel):
+    id: UUID4
+    approver_id: UUID4
+    action: str
+    comments: Optional[str]
+    approved_at: datetime
+    sequence_step: int
+    
+    class Config:
+        from_attributes = True
+
 class ExpenseWithDetails(ExpenseResponse):
-    employee: dict
-    approval_history: List[dict]
+    employee: UserInExpense
+    approval_history: List[ApprovalHistoryInExpense]
     expense_lines: List[ExpenseLineResponse]
+    
+    class Config:
+        from_attributes = True

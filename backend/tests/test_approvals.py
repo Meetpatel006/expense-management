@@ -37,6 +37,8 @@ def test_create_approval_rule(client: TestClient, db: Session):
     )
     db.add(manager)
     db.commit()
+    db.refresh(admin)
+    db.refresh(manager)
 
     # Get admin auth token
     response = client.post(
@@ -177,6 +179,7 @@ def test_approve_expense(client: TestClient, db: Session):
     )
     db.add(expense)
     db.commit()
+    db.refresh(expense)
 
     # Get manager auth token
     response = client.post(

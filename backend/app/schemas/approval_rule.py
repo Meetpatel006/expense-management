@@ -6,9 +6,17 @@ class RuleApproverCreate(BaseModel):
     sequence_order: int
     is_required: bool = False
 
+class ApproverInRule(BaseModel):
+    id: UUID4
+    name: str
+    email: str
+    
+    class Config:
+        from_attributes = True
+
 class RuleApproverResponse(RuleApproverCreate):
     id: UUID4
-    approver: dict
+    approver: ApproverInRule
 
     class Config:
         from_attributes = True

@@ -2,6 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from unittest.mock import AsyncMock, patch
 from app.database import Base, get_db
 from app.main import app
 from app.config import settings
@@ -41,5 +42,15 @@ def client(db):
             db.close()
 
     app.dependency_overrides[get_db] = override_get_db
-    with TestClient(app) as c:
-        yield c
+    
+    # Mock email service to avoid SMTP connection errors in tests
+    # Mock currency service to avoid external API calls
+    async def mock_currency_convert(self, from_currency, to_currency, amount):
+        """Mock currency conversion - returns the same amount (1:1)"""
+        return float(amount)
+    
+    with patch('app.services.email_service.EmailService.send_email', new_callable=AsyncMock) as mock_send_email, \
+         patch('app.services.currency_service.CurrencyService.convert', new=mock_currency_convert):
+        mock_send_email.return_value = None
+        with TestClient(app) as c:
+            yield c

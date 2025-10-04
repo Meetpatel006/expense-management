@@ -123,12 +123,18 @@ class ExpenseService:
                 detail="You are not authorized to approve this expense"
             )
 
+        # Get current sequence step
+        current_step = self.db.query(ApprovalHistory).filter(
+            ApprovalHistory.expense_id == expense.id
+        ).count() + 1
+        
         # Create approval history
         approval_history = ApprovalHistory(
             expense_id=expense.id,
             approver_id=approver.id,
             action=ApprovalAction.APPROVED,
-            comments=comments
+            comments=comments,
+            sequence_step=current_step
         )
         self.db.add(approval_history)
 
@@ -165,12 +171,18 @@ class ExpenseService:
         # Update expense status
         expense.status = ExpenseStatus.REJECTED
 
+        # Get current sequence step
+        current_step = self.db.query(ApprovalHistory).filter(
+            ApprovalHistory.expense_id == expense.id
+        ).count() + 1
+
         # Create approval history
         approval_history = ApprovalHistory(
             expense_id=expense.id,
             approver_id=approver.id,
             action=ApprovalAction.REJECTED,
-            comments=comments
+            comments=comments,
+            sequence_step=current_step
         )
         self.db.add(approval_history)
 

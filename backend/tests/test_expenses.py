@@ -53,7 +53,7 @@ def test_create_expense(client: TestClient, db: Session):
     )
     assert response.status_code == 201
     data = response.json()
-    assert data["amount"] == 100.00
+    assert float(data["amount"]) == 100.00
     assert data["currency"] == "USD"
     assert data["status"] == "draft"
 
@@ -130,6 +130,27 @@ def test_submit_expense(client: TestClient, db: Session):
         company_id=company.id
     )
     db.add(user)
+    
+    manager = User(
+        email="manager@test.com",
+        password_hash=get_password_hash("ManagerPass123!"),
+        name="Manager User",
+        role=UserRole.MANAGER,
+        company_id=company.id
+    )
+    db.add(manager)
+    db.flush()
+    
+    # Create approval rule
+    from app.models.approval_rule import ApprovalRule
+    approval_rule = ApprovalRule(
+        company_id=company.id,
+        rule_name="Default Rule",
+        manager_id=manager.id,
+        is_manager_first_approver=True,
+        is_sequential=True
+    )
+    db.add(approval_rule)
     db.flush()
 
     expense = Expense(
@@ -145,6 +166,7 @@ def test_submit_expense(client: TestClient, db: Session):
     )
     db.add(expense)
     db.commit()
+    db.refresh(expense)
 
     # Get auth token
     response = client.post(

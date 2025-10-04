@@ -120,6 +120,7 @@ def test_update_user(client: TestClient, db: Session):
     )
     db.add(user)
     db.commit()
+    db.refresh(user)
 
     # Get admin auth token
     response = client.post(
